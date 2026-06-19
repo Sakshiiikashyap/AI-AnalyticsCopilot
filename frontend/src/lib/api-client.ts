@@ -8,11 +8,27 @@ export class ApiError extends Error {
   }
 }
 
+function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("access_token");
+}
+
+export function setToken(token: string) {
+  localStorage.setItem("access_token", token);
+}
+
+export function clearToken() {
+  localStorage.removeItem("access_token");
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getToken();
+
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
   });
@@ -34,4 +50,18 @@ export const apiClient = {
 export interface HealthResponse {
   status: string;
   environment: string;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+}
+
+export interface UserResponse {
+  id: string;
+  email: string;
+  full_name: string | null;
+  plan: string;
+  created_at: string;
 }

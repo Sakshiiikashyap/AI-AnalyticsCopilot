@@ -1,0 +1,21 @@
+date,category,product,region,revenue,units_sold
+2024-01-05,Electronics,Wireless Earbuds,North,15000,120
+2024-01-12,Clothing,Winter Jacket,South,8000,200
+2024-01-18,Electronics,Smartwatch,East,22000,95
+2024-01-25,Furniture,Office Chair,West,5000,30
+2024-02-02,Electronics,Wireless Earbuds,North,18000,140
+2024-02-09,Clothing,Winter Jacket,South,7500,190
+2024-02-15,Electronics,Smartwatch,East,19500,88
+2024-02-22,Furniture,Office Chair,West,4800,28
+2024-03-01,Electronics,Wireless Earbuds,North,12000,95
+2024-03-08,Clothing,Summer Dress,South,9000,210
+2024-03-15,Electronics,Smartwatch,East,95000,400
+2024-03-22,Furniture,Office Chair,West,5200,32
+2024-04-01,Electronics,Wireless Earbuds,North,16500,130
+2024-04-08,Clothing,Summer Dress,South,8800,205
+2024-04-15,Electronics,Smartwatch,East,21000,92
+2024-04-22,Furniture,Bookshelf,West,3000,15
+2024-05-01,Electronics,Wireless Earbuds,North,17200,135
+2024-05-08,Clothing,Summer Dress,South,9200,215
+2024-05-15,Electronics,Smartwatch,East,20500,90
+2024-05-22,Furniture,Bookshelf,West,2800,12
