@@ -15,11 +15,15 @@ class Settings(BaseSettings):
     # Security
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24       # 24 hours
-    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
 
     # Database
     DATABASE_URL: str
+
+    # File storage
+    UPLOAD_DIR: str = "storage/uploads"
+    MAX_UPLOAD_SIZE_MB: int = 50
 
 
 @lru_cache
