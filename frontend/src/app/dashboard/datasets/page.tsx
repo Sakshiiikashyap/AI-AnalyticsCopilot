@@ -1,14 +1,17 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { uploadDataset, listDatasets } from "@/lib/datasets";
-import { DatasetResponse, ApiError } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
+import type { DatasetResponse } from "@/lib/api-client";
+import { ApiError } from "@/lib/api-client";
 
 export default function DatasetsPage() {
   const router = useRouter();
   const [datasets, setDatasets] = useState<DatasetResponse[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function refresh() {
@@ -41,7 +44,31 @@ export default function DatasetsPage() {
       setError(err instanceof ApiError ? err.message : "Upload failed.");
     } finally {
       setUploading(false);
-      e.target.value = ""; // reset so the same file can be re-selected if needed
+      e.target.value = "";
+    }
+  }
+
+  async function handleDelete(e: React.MouseEvent, datasetId: string) {
+    e.stopPropagation();
+    if (deletingId) return;
+    if (!confirm("Delete this dataset? This cannot be undone.")) return;
+
+    setDeletingId(datasetId);
+    setError(null);
+
+    setDatasets((prev) => prev.filter((d) => d.id !== datasetId));
+
+    try {
+      await apiClient.delete(`/api/v1/datasets/${datasetId}`);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) {
+        // already deleted - fine, UI already reflects this
+      } else {
+        setError(err instanceof ApiError ? err.message : "Delete failed.");
+        await refresh();
+      }
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -62,29 +89,38 @@ export default function DatasetsPage() {
 
         <div className="space-y-3">
           {datasets.map((ds) => (
-            <button
+            <div
               key={ds.id}
               onClick={() => router.push(`/dashboard/datasets/${ds.id}`)}
-              className="w-full text-left rounded-lg border border-zinc-800 bg-zinc-900 p-4 hover:border-zinc-600 transition-colors flex justify-between items-center"
+              className="w-full text-left rounded-lg border border-zinc-800 bg-zinc-900 p-4 hover:border-zinc-600 transition-colors flex justify-between items-center cursor-pointer"
             >
               <div>
                 <p className="font-medium">{ds.name}</p>
                 <p className="text-sm text-zinc-500">
-                  {ds.row_count ?? "—"} rows · {ds.column_count ?? "—"} columns · {ds.file_type.toUpperCase()}
+                  {ds.row_count ?? "-"} rows, {ds.column_count ?? "-"} columns, {ds.file_type.toUpperCase()}
                 </p>
               </div>
-              <span
-                className={`text-xs px-2 py-1 rounded-full ${
-                  ds.status === "ready"
-                    ? "bg-green-900 text-green-300"
-                    : ds.status === "failed"
-                    ? "bg-red-900 text-red-300"
-                    : "bg-yellow-900 text-yellow-300"
-                }`}
-              >
-                {ds.status}
-              </span>
-            </button>
+              <div className="flex items-center gap-3">
+                <span
+                  className={
+                    ds.status === "ready"
+                      ? "text-xs px-2 py-1 rounded-full bg-green-900 text-green-300"
+                      : ds.status === "failed"
+                      ? "text-xs px-2 py-1 rounded-full bg-red-900 text-red-300"
+                      : "text-xs px-2 py-1 rounded-full bg-yellow-900 text-yellow-300"
+                  }
+                >
+                  {ds.status}
+                </span>
+                <button
+                  onClick={(e) => handleDelete(e, ds.id)}
+                  disabled={deletingId === ds.id}
+                  className="text-xs px-2 py-1 rounded-md bg-zinc-800 hover:bg-red-900 text-zinc-400 hover:text-red-300 disabled:opacity-50"
+                >
+                  {deletingId === ds.id ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </div>
           ))}
 
           {datasets.length === 0 && <p className="text-zinc-500 text-center py-8">No datasets uploaded yet.</p>}
