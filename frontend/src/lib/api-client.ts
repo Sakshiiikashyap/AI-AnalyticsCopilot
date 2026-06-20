@@ -124,3 +124,51 @@ export interface DatasetPreviewResponse {
   rows: Record<string, unknown>[];
   total_rows: number;
 }
+
+export interface MissingValueColumn {
+  column: string;
+  missing_count: number;
+  missing_percentage: number;
+}
+
+export interface MissingValuesSummary {
+  total_missing_cells: number;
+  columns_with_missing: MissingValueColumn[];
+  complete_rows: number;
+}
+
+export interface CorrelationPair {
+  column_a: string;
+  column_b: string;
+  correlation: number;
+}
+
+export interface CorrelationSummary {
+  available: boolean;
+  reason?: string;
+  matrix: Record<string, Record<string, number | null>>;
+  strong_pairs: CorrelationPair[];
+}
+
+export interface OutlierColumn {
+  column: string;
+  outlier_count: number;
+  outlier_percentage: number;
+  lower_bound: number | null;
+  upper_bound: number | null;
+}
+
+export interface OutliersSummary {
+  method: string;
+  columns: OutlierColumn[];
+}
+
+export interface DatasetProfileResponse {
+  dataset_id: string;
+  summary: Record<string, unknown>;
+  missing_values: MissingValuesSummary;
+  duplicates_count: number;
+  correlation: CorrelationSummary;
+  outliers: OutliersSummary;
+  generated_at: string;
+}

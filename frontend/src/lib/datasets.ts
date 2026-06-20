@@ -1,4 +1,5 @@
-import { apiClient, uploadFile, DatasetResponse, DatasetPreviewResponse } from "@/lib/api-client";
+﻿import { apiClient, uploadFile } from "@/lib/api-client";
+import type { DatasetResponse, DatasetPreviewResponse, DatasetProfileResponse } from "@/lib/api-client";
 
 export async function uploadDataset(file: File): Promise<DatasetResponse> {
   return uploadFile<DatasetResponse>("/api/v1/datasets/upload", file);
@@ -9,9 +10,13 @@ export async function listDatasets(): Promise<DatasetResponse[]> {
 }
 
 export async function getDataset(id: string): Promise<DatasetResponse> {
-  return apiClient.get<DatasetResponse>(`/api/v1/datasets/${id}`);
+  return apiClient.get<DatasetResponse>("/api/v1/datasets/" + id);
 }
 
 export async function previewDataset(id: string): Promise<DatasetPreviewResponse> {
-  return apiClient.get<DatasetPreviewResponse>(`/api/v1/datasets/${id}/preview`);
+  return apiClient.get<DatasetPreviewResponse>("/api/v1/datasets/" + id + "/preview");
+}
+
+export async function getDatasetProfile(id: string): Promise<DatasetProfileResponse> {
+  return apiClient.get<DatasetProfileResponse>("/api/v1/datasets/" + id + "/profile");
 }
