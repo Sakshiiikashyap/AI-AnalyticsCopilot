@@ -59,8 +59,10 @@ def create_dataset(db: Session, user_id: str, original_filename: str, file_path:
 
 
 def process_dataset(db: Session, dataset: Dataset) -> Dataset:
-    """Parses the file and stores schema info. Synchronous for now — fine at
-    this scale; moves to a background task/queue once files get large."""
+    """Parses the file, infers schema, and runs profiling - all synchronously
+    for now. Moves to a background task/queue once files get large."""
+    from app.features.profiling.service import generate_profile
+
     try:
         df = parser.load_dataframe(dataset.file_path)
         schema = parser.infer_schema(df)
@@ -70,6 +72,8 @@ def process_dataset(db: Session, dataset: Dataset) -> Dataset:
         dataset.schema_json = schema
         dataset.status = "ready"
         db.commit()
+
+        generate_profile(db, dataset, df)
     except Exception:
         dataset.status = "failed"
         db.commit()

@@ -1,3 +1,7 @@
+from app.features.profiling.models import DatasetProfile
+from app.features.profiling.schemas import DatasetProfileResponse
+from app.shared.exceptions import NotFoundError
+
 from fastapi import APIRouter, Depends, UploadFile
 from sqlalchemy.orm import Session
 
@@ -44,3 +48,19 @@ def preview_dataset(dataset_id: str, db: Session = Depends(get_db), current_user
     dataset = service.get_dataset(db, str(current_user.id), dataset_id)
     df = service.get_dataframe_for_dataset(dataset)
     return dataframe_preview(df)
+
+@router.get("/{dataset_id}/profile", response_model=DatasetProfileResponse)
+def get_profile(dataset_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    dataset = service.get_dataset(db, str(current_user.id), dataset_id)
+    profile = db.query(DatasetProfile).filter(DatasetProfile.dataset_id == dataset.id).first()
+    if not profile:
+        raise NotFoundError("Profile not yet generated for this dataset.")
+    return DatasetProfileResponse(
+        dataset_id=dataset.id,
+        summary=profile.summary_json or {},
+        missing_values=profile.missing_values_json or {},
+        duplicates_count=profile.duplicates_count or 0,
+        correlation=profile.correlation_json or {},
+        outliers=profile.outliers_json or {},
+        generated_at=profile.generated_at,
+    )
