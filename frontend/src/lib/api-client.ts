@@ -41,6 +41,25 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export async function uploadFile<T>(path: string, file: File): Promise<T> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const token = getToken();
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: "Upload failed" }));
+    throw new ApiError(body.detail || "Upload failed", res.status);
+  }
+
+  return res.json() as Promise<T>;
+}
+
 export const apiClient = {
   get: <T>(path: string) => request<T>(path, { method: "GET" }),
   post: <T>(path: string, data?: unknown) =>
@@ -64,4 +83,39 @@ export interface UserResponse {
   full_name: string | null;
   plan: string;
   created_at: string;
+}
+
+export interface DatasetColumn {
+  name: string;
+  dtype: string;
+  semantic_type: string;
+  null_count: number;
+  unique_count: number;
+  min?: number;
+  max?: number;
+  mean?: number;
+}
+
+export interface DatasetSchema {
+  row_count: number;
+  column_count: number;
+  columns: DatasetColumn[];
+}
+
+export interface DatasetResponse {
+  id: string;
+  name: string;
+  original_filename: string;
+  file_type: string;
+  row_count: number | null;
+  column_count: number | null;
+  schema_json: DatasetSchema | null;
+  status: string;
+  created_at: string;
+}
+
+export interface DatasetPreviewResponse {
+  columns: string[];
+  rows: Record<string, unknown>[];
+  total_rows: number;
 }

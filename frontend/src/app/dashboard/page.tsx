@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -44,9 +44,17 @@ export default function DashboardPage() {
           <p>
             <span className="text-zinc-400">Plan:</span> {user.plan}
           </p>
+
+          
+            <a href="/dashboard/datasets"
+            className="mt-4 block text-center rounded-md bg-blue-600 py-2 hover:bg-blue-500"
+          >
+            Go to Datasets →
+          </a>
+
           <button
             onClick={handleLogout}
-            className="mt-4 w-full rounded-md bg-zinc-800 py-2 hover:bg-zinc-700"
+            className="mt-2 w-full rounded-md bg-zinc-800 py-2 hover:bg-zinc-700"
           >
             Log out
           </button>
