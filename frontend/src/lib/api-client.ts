@@ -186,3 +186,16 @@ export interface ChatMessageResponse {
   computed_context: Record<string, unknown> | null;
   created_at: string;
 }
+
+export interface DashboardSummary {
+  total_datasets: number;
+  ready_datasets: number;
+  chat_sessions: number;
+  forecast_reports: number;
+  recent_activity: {
+    dataset_id: string;
+    name: string;
+    status: string;
+    created_at: string;
+  }[];
+}
