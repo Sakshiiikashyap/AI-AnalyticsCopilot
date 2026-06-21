@@ -47,9 +47,6 @@ export default function DashboardPage() {
             <h1 className="text-2xl font-semibold">Welcome back, {user.full_name || user.email}</h1>
             <p className="text-zinc-500 text-sm">Plan: {user.plan}</p>
           </div>
-          <button onClick={handleLogout} className="rounded-md bg-zinc-800 px-4 py-2 text-sm hover:bg-zinc-700">
-            Log out
-          </button>
         </div>
 
         {summary && (
