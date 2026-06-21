@@ -66,7 +66,8 @@ def send_message(db: Session, user_id: str, session_id: str, content: str) -> Ch
     llm = get_llm_provider()
     try:
         answer_text = llm.generate(SYSTEM_PROMPT, user_prompt)
-    except Exception:
+    except Exception as e:
+        print("GEMINI ERROR:", repr(e))
         raise UpstreamError("The AI service is temporarily unavailable. Please try again in a moment.")
 
     assistant_msg = ChatMessage(

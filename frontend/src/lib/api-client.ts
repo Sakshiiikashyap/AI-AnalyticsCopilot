@@ -172,3 +172,17 @@ export interface DatasetProfileResponse {
   outliers: OutliersSummary;
   generated_at: string;
 }
+
+export interface ChatSessionResponse {
+  id: string;
+  dataset_id: string;
+  created_at: string;
+}
+
+export interface ChatMessageResponse {
+  id: string;
+  role: string;
+  content: string;
+  computed_context: Record<string, unknown> | null;
+  created_at: string;
+}

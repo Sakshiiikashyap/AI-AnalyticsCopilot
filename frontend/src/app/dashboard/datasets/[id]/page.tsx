@@ -52,6 +52,13 @@ export default function DatasetDetailPage() {
           Back to datasets
         </button>
 
+        <button
+          onClick={() => router.push("/dashboard/datasets/" + datasetId + "/chat")}
+          className="ml-3 rounded-md bg-blue-600 px-3 py-1 text-sm hover:bg-blue-500"
+        >
+          Chat with this dataset
+        </button>
+
         <h1 className="text-3xl font-semibold mb-2">{dataset.name}</h1>
         <p className="text-zinc-500 mb-6">
           {dataset.row_count} rows, {dataset.column_count} columns, status: {dataset.status}
