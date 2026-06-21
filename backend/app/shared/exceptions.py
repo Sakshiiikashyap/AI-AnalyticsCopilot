@@ -25,10 +25,12 @@ class ValidationFailedError(AppError):
     status_code = 422
 
 
-def parse_uuid(value: str, entity_name: str = "resource") -> uuid.UUID:
-    """Parses a string into a UUID, raising a clean 404 instead of a raw crash
-    if the ID is malformed — and keeps DB query param types consistent."""
+class UpstreamError(AppError):
+    status_code = 502
+
+
+def parse_uuid(value: str, entity_name: str = "resource"):
     try:
         return uuid.UUID(value)
     except (ValueError, AttributeError, TypeError):
-        raise NotFoundError(f"{entity_name.capitalize()} not found.")
+        raise NotFoundError(entity_name.capitalize() + " not found.")
