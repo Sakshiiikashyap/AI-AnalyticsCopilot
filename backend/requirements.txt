@@ -14,3 +14,5 @@ numpy>=2.1.0
 openpyxl>=3.1.5
 python-multipart>=0.0.20
 google-generativeai==0.8.3
+scikit-learn>=1.5.0
+xgboost>=2.1.0python scripts/create_tables.py

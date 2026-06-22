@@ -8,6 +8,7 @@ from app.features.auth.models import User
 from app.features.datasets.models import Dataset
 from app.features.profiling.models import DatasetProfile
 from app.features.chat.models import ChatSession, ChatMessage
+from app.features.forecasting.models import ForecastRun
 
 Base.metadata.create_all(bind=engine)
 print("Tables created successfully.")

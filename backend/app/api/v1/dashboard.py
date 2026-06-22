@@ -7,6 +7,7 @@ from app.core.deps import get_current_user
 from app.features.auth.models import User
 from app.features.chat.models import ChatSession
 from app.features.datasets.models import Dataset
+from app.features.forecasting.models import ForecastRun
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -32,11 +33,15 @@ def get_dashboard_summary(db: Session = Depends(get_db), current_user: User = De
         .all()
     )
 
+    forecast_reports = (
+        db.query(func.count(ForecastRun.id)).filter(ForecastRun.user_id == current_user.id).scalar() or 0
+    )
+
     return {
         "total_datasets": total_datasets,
         "ready_datasets": ready_datasets,
         "chat_sessions": chat_sessions,
-        "forecast_reports": 0,
+        "forecast_reports": forecast_reports,
         "recent_activity": [
             {
                 "dataset_id": str(d.id),
