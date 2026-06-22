@@ -6,6 +6,7 @@ import { getCurrentUser, logout } from "@/lib/auth";
 import { apiClient } from "@/lib/api-client";
 import type { UserResponse, DashboardSummary } from "@/lib/api-client";
 import { ApiError } from "@/lib/api-client";
+import { motion } from "framer-motion";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -51,22 +52,23 @@ export default function DashboardPage() {
 
         {summary && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-              <p className="text-zinc-500 text-sm">Total Datasets</p>
-              <p className="text-3xl font-semibold">{summary.total_datasets}</p>
-            </div>
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-              <p className="text-zinc-500 text-sm">Analyzed</p>
-              <p className="text-3xl font-semibold">{summary.ready_datasets}</p>
-            </div>
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-              <p className="text-zinc-500 text-sm">Chat Sessions</p>
-              <p className="text-3xl font-semibold">{summary.chat_sessions}</p>
-            </div>
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-              <p className="text-zinc-500 text-sm">Forecast Reports</p>
-              <p className="text-3xl font-semibold">{summary.forecast_reports}</p>
-            </div>
+            {[
+              { label: "Total Datasets", value: summary.total_datasets },
+              { label: "Analyzed", value: summary.ready_datasets },
+              { label: "Chat Sessions", value: summary.chat_sessions },
+              { label: "Forecast Reports", value: summary.forecast_reports },
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 hover:border-zinc-700 transition-colors"
+              >
+                <p className="text-zinc-500 text-sm">{stat.label}</p>
+                <p className="text-3xl font-semibold">{stat.value}</p>
+              </motion.div>
+            ))}
           </div>
         )}
 

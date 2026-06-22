@@ -27,7 +27,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             className={
               pathname === "/dashboard"
                 ? "text-left px-3 py-2 rounded-md bg-zinc-900 text-white text-sm"
-                : "text-left px-3 py-2 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-900 text-sm"
+                : "text-left px-3 py-2 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-900 text-sm transition-colors duration-150"
             }
           >
             Dashboard
@@ -37,7 +37,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             className={
               isActive("/dashboard/datasets")
                 ? "text-left px-3 py-2 rounded-md bg-zinc-900 text-white text-sm"
-                : "text-left px-3 py-2 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-900 text-sm"
+                : "text-left px-3 py-2 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-900 text-sm transition-colors duration-150"
             }
           >
             Datasets
