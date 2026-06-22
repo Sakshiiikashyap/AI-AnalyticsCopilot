@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getDataset, previewDataset, getDatasetProfile } from "@/lib/datasets";
 import type { DatasetResponse, DatasetPreviewResponse, DatasetProfileResponse } from "@/lib/api-client";
 import { ApiError } from "@/lib/api-client";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 export default function DatasetDetailPage() {
   const params = useParams();
@@ -105,13 +106,23 @@ export default function DatasetDetailPage() {
         {profile && profile.outliers.columns.length > 0 && (
           <div className="mb-8">
             <h2 className="text-lg font-medium mb-3">Outliers Detected (IQR method)</h2>
-            <div className="rounded-lg border border-zinc-800 overflow-hidden">
-              {profile.outliers.columns.map((col) => (
-                <div key={col.column} className="flex justify-between px-4 py-2 border-b border-zinc-800 last:border-b-0">
-                  <span>{col.column}</span>
-                  <span className="text-zinc-400">{col.outlier_count} outliers ({col.outlier_percentage}%)</span>
-                </div>
-              ))}
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4" style={{ height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={profile.outliers.columns} layout="vertical" margin={{ left: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" horizontal={false} />
+                  <XAxis type="number" stroke="#71717a" fontSize={12} />
+                  <YAxis type="category" dataKey="column" stroke="#71717a" fontSize={12} width={140} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#18181b", border: "1px solid #27272a", borderRadius: 8 }}
+                    labelStyle={{ color: "#fff" }}
+                  />
+                  <Bar dataKey="outlier_count" radius={[0, 4, 4, 0]}>
+                    {profile.outliers.columns.map((entry, index) => (
+                      <Cell key={index} fill={entry.outlier_percentage > 5 ? "#ef4444" : "#3b82f6"} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         )}
@@ -119,15 +130,25 @@ export default function DatasetDetailPage() {
         {profile && profile.correlation.available && profile.correlation.strong_pairs.length > 0 && (
           <div className="mb-8">
             <h2 className="text-lg font-medium mb-3">Strong Correlations</h2>
-            <div className="rounded-lg border border-zinc-800 overflow-hidden">
-              {profile.correlation.strong_pairs.map((pair, i) => (
-                <div key={i} className="flex justify-between px-4 py-2 border-b border-zinc-800 last:border-b-0">
-                  <span>{pair.column_a} vs {pair.column_b}</span>
-                  <span className={pair.correlation > 0 ? "text-green-400" : "text-red-400"}>
-                    {pair.correlation}
-                  </span>
-                </div>
-              ))}
+            <div className="space-y-2">
+              {profile.correlation.strong_pairs.map((pair, i) => {
+                const widthPct = Math.abs(pair.correlation) * 100;
+                const isPositive = pair.correlation > 0;
+                return (
+                  <div key={i} className="rounded-lg border border-zinc-800 bg-zinc-900 p-3">
+                    <div className="flex justify-between text-sm mb-2">
+                      <span>{pair.column_a} vs {pair.column_b}</span>
+                      <span className={isPositive ? "text-green-400" : "text-red-400"}>{pair.correlation}</span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-zinc-800 overflow-hidden">
+                      <div
+                        className={isPositive ? "h-full bg-green-500" : "h-full bg-red-500"}
+                        style={{ width: widthPct + "%" }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
