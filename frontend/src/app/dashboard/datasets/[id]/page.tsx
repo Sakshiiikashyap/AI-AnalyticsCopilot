@@ -59,6 +59,7 @@ export default function DatasetDetailPage() {
         >
           Chat with this dataset
         </button>
+        <button onClick={() => router.push("/dashboard/datasets/" + datasetId + "/forecast")} className="ml-3 rounded-md bg-zinc-800 px-3 py-1 text-sm hover:bg-zinc-700">Forecast</button>
 
         <h1 className="text-3xl font-semibold mb-2">{dataset.name}</h1>
         <p className="text-zinc-500 mb-6">

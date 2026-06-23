@@ -199,3 +199,20 @@ export interface DashboardSummary {
     created_at: string;
   }[];
 }
+
+export interface ForecastPoint {
+  date: string;
+  value: number;
+  lower_bound?: number;
+  upper_bound?: number;
+}
+
+export interface ForecastResponse {
+  dataset_id: string;
+  date_column: string;
+  metric_column: string;
+  method: string;
+  frequency: string;
+  history: ForecastPoint[];
+  forecast: ForecastPoint[];
+}

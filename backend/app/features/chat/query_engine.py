@@ -18,7 +18,10 @@ def _numeric_columns(df):
 
 
 def _categorical_columns(df):
-    return [c for c in df.columns if df[c].dtype == object or pd.api.types.is_categorical_dtype(df[c])]
+    return [
+        c for c in df.columns
+        if df[c].dtype == object or str(df[c].dtype) in ("str", "string") or pd.api.types.is_categorical_dtype(df[c])
+    ]
 
 
 def _datetime_columns(df):

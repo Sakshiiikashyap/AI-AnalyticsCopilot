@@ -56,7 +56,7 @@ def _infer_semantic_type(series: pd.Series) -> str:
     if pd.api.types.is_numeric_dtype(series):
         return "integer" if pd.api.types.is_integer_dtype(series) else "float"
 
-    if series.dtype == object:
+    if series.dtype == object or str(series.dtype) in ("str", "string"):
         sample = series.dropna().head(20)
         if len(sample) > 0:
             try:

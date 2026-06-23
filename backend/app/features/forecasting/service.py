@@ -13,7 +13,7 @@ def _auto_detect_date_column(df: pd.DataFrame):
         if pd.api.types.is_datetime64_any_dtype(df[col]):
             return col
     for col in df.columns:
-        if df[col].dtype == object:
+        if df[col].dtype == object or str(df[col].dtype) in ("str", "string"):
             parsed = pd.to_datetime(df[col], errors="coerce", format="mixed")
             if parsed.notna().mean() > 0.8:
                 return col
