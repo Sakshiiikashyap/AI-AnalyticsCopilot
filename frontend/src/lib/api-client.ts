@@ -207,6 +207,13 @@ export interface ForecastPoint {
   upper_bound?: number;
 }
 
+export interface BacktestMetrics {
+  holdout_periods: number;
+  mae: number;
+  rmse: number;
+  mae_percentage_of_mean: number | null;
+}
+
 export interface ForecastResponse {
   dataset_id: string;
   date_column: string;
@@ -215,4 +222,5 @@ export interface ForecastResponse {
   frequency: string;
   history: ForecastPoint[];
   forecast: ForecastPoint[];
+  backtest: BacktestMetrics | null;
 }

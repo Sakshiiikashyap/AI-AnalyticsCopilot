@@ -1,14 +1,15 @@
 """
-XGBoost-based time series forecaster.
+XGBoost-based time series forecaster, with backtest accuracy validation.
 
 Approach:
-  1. Build calendar + lag/rolling features from the historical series.
-  2. Train an XGBoost regressor to predict the next value from those features.
-  3. Forecast iteratively (recursive multi-step): predict one step ahead,
-     append it to history, recompute features, predict the next step.
-  4. Approximate a confidence interval from the residual standard deviation
-     of the training fit. XGBoost has no native predictive uncertainty,
-     so this is a practical approximation, not a true quantile estimate.
+  1. Hold out the most recent N real data points as a test set.
+  2. Train on everything before that, forecast forward to "predict" the
+     held-out period, and compare against what actually happened (MAE, RMSE).
+     This gives an honest accuracy estimate, not just a black-box forecast.
+  3. Re-train on the FULL dataset and forecast forward into the real future
+     for the actual output.
+  4. Confidence intervals are approximated from training residual std dev,
+     since XGBoost has no native predictive uncertainty.
 """
 from typing import Any
 
@@ -20,18 +21,65 @@ from app.features.forecasting.base import ForecastProvider
 
 LAGS = [1, 2, 3, 7]
 ROLLING_WINDOWS = [3, 7]
+MIN_TRAINING_ROWS = 15
 
 
 class XGBoostForecastProvider(ForecastProvider):
     def forecast(self, dates: list, values: list, periods: int) -> dict[str, Any]:
         df = pd.DataFrame({"date": pd.to_datetime(dates), "value": values}).sort_values("date").reset_index(drop=True)
 
-        if len(df) < 15:
+        if len(df) < MIN_TRAINING_ROWS:
             raise ValueError("Not enough historical data points to forecast (need at least 15).")
 
         freq = _infer_frequency(df["date"])
-        features_df = _build_features(df)
 
+        backtest_metrics = self._run_backtest(df, periods, freq)
+
+        forecast_points, history_points = self._fit_and_forecast(df, periods, freq)
+
+        return {
+            "method": "XGBoost (lag and calendar features, recursive multi-step)",
+            "frequency": freq,
+            "history": history_points,
+            "forecast": forecast_points,
+            "backtest": backtest_metrics,
+        }
+
+    def _run_backtest(self, df: pd.DataFrame, periods: int, freq: str) -> dict[str, Any] | None:
+        """Holds out the most recent points, retrains without them, predicts
+        them, and compares to what actually happened. Returns None if there
+        isn't enough data left over to do this meaningfully."""
+        holdout_size = min(periods, max(5, int(len(df) * 0.15)))
+        if len(df) - holdout_size < MIN_TRAINING_ROWS:
+            return None
+
+        train_part = df.iloc[: len(df) - holdout_size].reset_index(drop=True)
+        actual_part = df.iloc[len(df) - holdout_size :].reset_index(drop=True)
+
+        try:
+            predicted_points, _ = self._fit_and_forecast(train_part, holdout_size, freq)
+        except ValueError:
+            return None
+
+        predicted_values = np.array([p["value"] for p in predicted_points])
+        actual_values = actual_part["value"].to_numpy()
+
+        mae = float(np.mean(np.abs(predicted_values - actual_values)))
+        rmse = float(np.sqrt(np.mean((predicted_values - actual_values) ** 2)))
+        mean_actual = float(np.mean(actual_values))
+        mae_pct = round(mae / mean_actual * 100, 2) if mean_actual != 0 else None
+
+        return {
+            "holdout_periods": holdout_size,
+            "mae": round(mae, 4),
+            "rmse": round(rmse, 4),
+            "mae_percentage_of_mean": mae_pct,
+        }
+
+    def _fit_and_forecast(self, df: pd.DataFrame, periods: int, freq: str) -> tuple[list, list]:
+        """Core fit + recursive forecast logic, reused for both backtesting
+        and the real future forecast. Returns (forecast_points, history_points)."""
+        features_df = _build_features(df)
         train_df = features_df.dropna()
         if len(train_df) < 10:
             raise ValueError("Not enough data after feature engineering to train a forecast model.")
@@ -65,12 +113,8 @@ class XGBoostForecastProvider(ForecastProvider):
             )
             history = pd.concat([history, pd.DataFrame([{"date": next_date, "value": pred}])], ignore_index=True)
 
-        return {
-            "method": "XGBoost (lag and calendar features, recursive multi-step)",
-            "frequency": freq,
-            "history": [{"date": str(d.date()), "value": float(v)} for d, v in zip(df["date"], df["value"])],
-            "forecast": forecast_points,
-        }
+        history_points = [{"date": str(d.date()), "value": float(v)} for d, v in zip(df["date"], df["value"])]
+        return forecast_points, history_points
 
 
 def _infer_frequency(dates: pd.Series) -> str:

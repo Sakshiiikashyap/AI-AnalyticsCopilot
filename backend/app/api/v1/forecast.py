@@ -29,4 +29,5 @@ def create_forecast(
         frequency=result["frequency"],
         history=result["history"],
         forecast=result["forecast"],
+        backtest=result.get("backtest"),
     )
