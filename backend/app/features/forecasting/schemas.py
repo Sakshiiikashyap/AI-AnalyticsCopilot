@@ -18,3 +18,5 @@ class ForecastResponse(BaseModel):
     frequency: str
     history: list[dict[str, Any]]
     forecast: list[dict[str, Any]]
+    backtest: dict[str, Any] | None = None
+    warning: str | None = None

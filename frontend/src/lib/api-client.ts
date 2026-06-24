@@ -223,4 +223,5 @@ export interface ForecastResponse {
   history: ForecastPoint[];
   forecast: ForecastPoint[];
   backtest: BacktestMetrics | null;
+  warning: string | null;
 }

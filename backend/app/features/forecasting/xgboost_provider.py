@@ -37,12 +37,21 @@ class XGBoostForecastProvider(ForecastProvider):
 
         forecast_points, history_points = self._fit_and_forecast(df, periods, freq)
 
+        warning = None
+        if periods > len(df) * 0.5:
+            warning = (
+                "This forecast extends quite far relative to the amount of historical data available "
+                "(" + str(periods) + " periods requested vs " + str(len(df)) + " historical points). "
+                "Treat longer-horizon predictions with extra caution."
+            )
+
         return {
             "method": "XGBoost (lag and calendar features, recursive multi-step)",
             "frequency": freq,
             "history": history_points,
             "forecast": forecast_points,
             "backtest": backtest_metrics,
+            "warning": warning,
         }
 
     def _run_backtest(self, df: pd.DataFrame, periods: int, freq: str) -> dict[str, Any] | None:
@@ -58,7 +67,7 @@ class XGBoostForecastProvider(ForecastProvider):
 
         try:
             predicted_points, _ = self._fit_and_forecast(train_part, holdout_size, freq)
-        except ValueError:
+        except ValueError as e:
             return None
 
         predicted_values = np.array([p["value"] for p in predicted_points])

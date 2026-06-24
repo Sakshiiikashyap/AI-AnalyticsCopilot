@@ -30,4 +30,5 @@ def create_forecast(
         history=result["history"],
         forecast=result["forecast"],
         backtest=result.get("backtest"),
+        warning=result.get("warning"),
     )

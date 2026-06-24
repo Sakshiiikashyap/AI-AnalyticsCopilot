@@ -148,6 +148,12 @@ export default function ForecastPage() {
             </p>
             <p className="text-zinc-600 text-xs mb-4">{result.method}</p>
 
+            {result.warning && (
+              <div className="rounded-lg border border-yellow-800 bg-yellow-950 p-3 mb-4 text-yellow-300 text-sm">
+                {result.warning}
+              </div>
+            )}
+
             {result.backtest && (
               <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 mb-6 grid grid-cols-3 gap-4">
                 <div>
