@@ -240,3 +240,13 @@ export interface AnomalyResponse {
   anomaly_count: number;
   anomalies: AnomalyRecord[];
 }
+
+export interface InsightResponse {
+  dataset_id: string;
+  summary: string;
+  key_findings: string[];
+  risks: string[];
+  opportunities: string[];
+  recommendations: string[];
+  generated_at: string;
+}
