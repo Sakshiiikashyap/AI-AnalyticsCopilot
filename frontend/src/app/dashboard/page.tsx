@@ -51,12 +51,14 @@ export default function DashboardPage() {
         </div>
 
         {summary && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
             {[
               { label: "Total Datasets", value: summary.total_datasets },
               { label: "Analyzed", value: summary.ready_datasets },
               { label: "Chat Sessions", value: summary.chat_sessions },
               { label: "Forecast Reports", value: summary.forecast_reports },
+              { label: "Anomaly Runs", value: summary.anomaly_runs },
+              { label: "Insight Reports", value: summary.insight_runs },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}

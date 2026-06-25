@@ -8,6 +8,8 @@ from app.features.auth.models import User
 from app.features.chat.models import ChatSession
 from app.features.datasets.models import Dataset
 from app.features.forecasting.models import ForecastRun
+from app.features.anomaly.models import AnomalyRun
+from app.features.insights.models import InsightRun
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -36,12 +38,20 @@ def get_dashboard_summary(db: Session = Depends(get_db), current_user: User = De
     forecast_reports = (
         db.query(func.count(ForecastRun.id)).filter(ForecastRun.user_id == current_user.id).scalar() or 0
     )
+    anomaly_runs = (
+        db.query(func.count(AnomalyRun.id)).filter(AnomalyRun.user_id == current_user.id).scalar() or 0
+    )
+    insight_runs = (
+        db.query(func.count(InsightRun.id)).filter(InsightRun.user_id == current_user.id).scalar() or 0
+    )
 
     return {
         "total_datasets": total_datasets,
         "ready_datasets": ready_datasets,
         "chat_sessions": chat_sessions,
         "forecast_reports": forecast_reports,
+        "anomaly_runs": anomaly_runs,
+        "insight_runs": insight_runs,
         "recent_activity": [
             {
                 "dataset_id": str(d.id),

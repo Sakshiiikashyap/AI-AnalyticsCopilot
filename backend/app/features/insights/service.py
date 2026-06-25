@@ -102,15 +102,12 @@ def generate_insights(db: Session, user_id: str, dataset_id: str) -> InsightRun:
     llm = get_llm_provider()
     try:
         raw_response = llm.generate(INSIGHT_SYSTEM_PROMPT, prompt, max_output_tokens=2048)
-    except Exception as e:
-        print("INSIGHT LLM CALL FAILED:", repr(e))
+    except Exception:
         raise UpstreamError("Could not generate insights right now. Please try again in a moment.")
 
     try:
         parsed = _parse_llm_json(raw_response)
-    except Exception as e:
-        print("INSIGHT JSON PARSE FAILED:", repr(e))
-        print("RAW RESPONSE WAS:", raw_response)
+    except Exception:
         raise UpstreamError("Could not generate insights right now. Please try again in a moment.")
 
     result = {

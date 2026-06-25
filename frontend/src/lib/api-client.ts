@@ -192,6 +192,8 @@ export interface DashboardSummary {
   ready_datasets: number;
   chat_sessions: number;
   forecast_reports: number;
+  anomaly_runs: number;
+  insight_runs: number;
   recent_activity: {
     dataset_id: string;
     name: string;
