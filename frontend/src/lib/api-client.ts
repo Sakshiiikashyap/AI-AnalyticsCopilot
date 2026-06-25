@@ -225,3 +225,18 @@ export interface ForecastResponse {
   backtest: BacktestMetrics | null;
   warning: string | null;
 }
+
+export interface AnomalyRecord {
+  row_index: number;
+  anomaly_score: number;
+  row_data: Record<string, unknown>;
+}
+
+export interface AnomalyResponse {
+  dataset_id: string;
+  method: string;
+  columns_used: string[];
+  total_rows: number;
+  anomaly_count: number;
+  anomalies: AnomalyRecord[];
+}

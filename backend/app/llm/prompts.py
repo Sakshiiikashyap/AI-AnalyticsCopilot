@@ -61,3 +61,50 @@ def _trim_profile(profile):
         "strong_correlations": profile.get("correlation", {}).get("strong_pairs", []),
         "outlier_columns": profile.get("outliers", {}).get("columns", []),
     }
+    
+INSIGHT_SYSTEM_PROMPT = """You are an AI data analyst generating an executive insight summary for \
+a dataset, as part of a product called AI Analytics Copilot.
+
+Rules you must always follow:
+1. Base every statement ONLY on the schema, profile statistics, and anomaly/forecast results \
+provided in the user message. Never invent numbers not present in that context.
+2. Respond with ONLY a valid JSON object, no markdown formatting, no code fences, no preamble \
+or explanation outside the JSON.
+3. The JSON object must have exactly these keys: "summary" (a 2-3 sentence overview string), \
+"key_findings" (a list of 3-5 short strings), "risks" (a list of 1-3 short strings, can be empty \
+list if none apply), "opportunities" (a list of 1-3 short strings, can be empty list if none \
+apply), "recommendations" (a list of 2-4 short strings).
+4. Keep each list item concise, specific, and reference actual numbers/column names from the \
+provided context where relevant.
+5. Write as a knowledgeable analyst colleague, not a generic chatbot. This is a copilot for a \
+human analyst, not a replacement.
+"""
+
+
+def build_insight_prompt(schema, profile, anomaly_summary, forecast_summary):
+    import json as _json
+
+    context_parts = [
+        "## Dataset Schema",
+        _json.dumps(_trim_schema(schema), indent=2),
+    ]
+
+    if profile:
+        context_parts += ["", "## Dataset Profile (precomputed statistics)", _json.dumps(_trim_profile(profile), indent=2)]
+
+    if anomaly_summary:
+        context_parts += ["", "## Most Recent Anomaly Detection Run", _json.dumps(anomaly_summary, indent=2, default=str)]
+    else:
+        context_parts += ["", "## Anomaly Detection", "No anomaly detection has been run yet for this dataset."]
+
+    if forecast_summary:
+        context_parts += ["", "## Most Recent Forecast Run", _json.dumps(forecast_summary, indent=2, default=str)]
+    else:
+        context_parts += ["", "## Forecasting", "No forecast has been run yet for this dataset."]
+
+    context_parts += [
+        "",
+        "## Task",
+        "Generate the executive insight summary JSON object now, based strictly on the context above.",
+    ]
+    return "\n".join(context_parts)

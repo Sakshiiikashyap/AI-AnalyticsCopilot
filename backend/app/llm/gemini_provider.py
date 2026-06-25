@@ -9,13 +9,13 @@ class GeminiProvider(LLMProvider):
         genai.configure(api_key=settings.GEMINI_API_KEY)
         self._model = genai.GenerativeModel(settings.GEMINI_MODEL)
 
-    def generate(self, system_prompt: str, user_prompt: str) -> str:
+    def generate(self, system_prompt: str, user_prompt: str, max_output_tokens: int = 1024) -> str:
         response = self._model.generate_content(
             [
                 {"role": "user", "parts": [system_prompt]},
                 {"role": "model", "parts": ["Understood. I will answer strictly from the provided data context."]},
                 {"role": "user", "parts": [user_prompt]},
             ],
-            generation_config={"temperature": 0.2, "max_output_tokens": 1024},
+            generation_config={"temperature": 0.2, "max_output_tokens": max_output_tokens},
         )
         return response.text
