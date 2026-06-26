@@ -11,6 +11,7 @@ from app.features.chat.models import ChatSession, ChatMessage
 from app.features.forecasting.models import ForecastRun
 from app.features.anomaly.models import AnomalyRun
 from app.features.insights.models import InsightRun
+from app.features.reports.models import ReportRun
 
 Base.metadata.create_all(bind=engine)
 print("Tables created successfully.")

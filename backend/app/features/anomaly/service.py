@@ -54,11 +54,41 @@ def _run_isolation_forest(feature_df: pd.DataFrame, contamination: float) -> np.
     return normalized, is_anomaly
 
 
+def _estimate_eps(scaled: np.ndarray, min_samples: int, target_fraction: float) -> float:
+    """
+    Data-driven eps estimation, replacing a hardcoded guess.
+
+    Standard technique: compute each point's distance to its min_samples-th
+    nearest neighbor (the "k-distance"), then pick eps as a percentile of
+    those distances. A LOWER percentile means a SMALLER eps, which makes
+    DBSCAN stricter (fewer points qualify as "dense enough" to join a
+    cluster) and so flags MORE points as noise/anomalies - the opposite of
+    what target_fraction asks for. We invert that relationship below.
+    """
+    from sklearn.neighbors import NearestNeighbors
+
+    neighbors = NearestNeighbors(n_neighbors=min_samples)
+    neighbors.fit(scaled)
+    distances, _ = neighbors.kneighbors(scaled)
+    k_distances = np.sort(distances[:, -1])
+
+    # We want roughly target_fraction of points to end up as noise. Noise
+    # points are exactly those whose k-distance exceeds eps, so eps should
+    # sit at the (1 - target_fraction) percentile of the k-distance curve.
+    percentile = max(1.0, min(99.0, (1 - target_fraction) * 100))
+    eps = float(np.percentile(k_distances, percentile))
+    return max(eps, 1e-3)
+
+
 def _run_dbscan(feature_df: pd.DataFrame, contamination: float) -> tuple[np.ndarray, np.ndarray]:
-    """DBSCAN labels noise points as -1. We use a heuristic eps based on
-    feature scale since DBSCAN has no contamination parameter directly."""
+    """DBSCAN labels noise points as -1. eps is estimated from the data's
+    own nearest-neighbor distance distribution, targeting roughly
+    `contamination` fraction of points as noise, instead of a fixed guess."""
     scaled = StandardScaler().fit_transform(feature_df)
-    model = DBSCAN(eps=1.5, min_samples=max(5, int(len(feature_df) * 0.02)))
+    min_samples = max(5, int(len(feature_df) * 0.02))
+    eps = _estimate_eps(scaled, min_samples, contamination)
+
+    model = DBSCAN(eps=eps, min_samples=min_samples)
     labels = model.fit_predict(scaled)
 
     is_anomaly = labels == -1
