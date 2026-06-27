@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
-from app.main import limiter
+from app.core.limiter import limiter
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.features.auth import service
@@ -37,7 +37,11 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
 
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(payload: RefreshRequest):
-    new_access = service.refresh_access_token(payload.refresh_token)
+    try:
+        new_access = service.refresh_access_token(payload.refresh_token)
+    except Exception as e:
+        print("REFRESH FAILED:", repr(e))
+        raise
     return TokenResponse(access_token=new_access, refresh_token=payload.refresh_token)
 
 
